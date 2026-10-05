@@ -191,7 +191,7 @@ BOOL driverIsNotWorking(GameDriverOptions o)
 {
     GameDriverOptions o = driver.flags;
     
-    if (o & (GameDriverMachineClickableArtwork | GameDriverMachineRequiresArtwork | GameDriverMachineMechanical))
+    if (o & (GameDriverMachineRequiresArtwork | GameDriverMachineMechanical))
     {
         if (error != nil)
         {
