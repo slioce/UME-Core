@@ -29,6 +29,7 @@
 #import <OpenEmuBase/OERingBuffer.h>
 #import <OpenGL/gl.h>
 #import <os/log.h>
+#import <objc/runtime.h>
 
 @interface MAMEAuditResult: NSObject
 
@@ -50,7 +51,11 @@
 {
     uint32_t _buttons[8][OEArcadeButtonCount];
     uint32_t _axes[8][InputMaxAxis];
-    
+
+    // mouse, as player 1 lightgun
+    int32_t _gunAxes[2];
+    uint32_t _gunButtons[2];
+
     uint32_t *_buffer;
     OEIntSize _bufferSize;
     OEIntRect _screenRect;
@@ -65,6 +70,13 @@
     BOOL _supportsRewinding;
 }
 
+// mouse, named as in the PlayStation, Saturn and SNES responder client protocols
+- (oneway void)mouseMovedAtPoint:(OEIntPoint)point;
+- (oneway void)leftMouseDownAtPoint:(OEIntPoint)point;
+- (oneway void)leftMouseUp;
+- (oneway void)rightMouseDownAtPoint:(OEIntPoint)point;
+- (oneway void)rightMouseUp;
+
 @end
 
 static int32_t joystick_get_state(void *device_internal, void *item_internal)
@@ -72,7 +84,63 @@ static int32_t joystick_get_state(void *device_internal, void *item_internal)
     return *(int32_t *)item_internal;
 }
 
+/*! Maps a position in [0, extent] to MAME's absolute axis range, the same way
+ * MAME's own OSDs map the pointer over the whole window for lightguns.
+ */
+static int32_t lightgun_axis_value(int32_t pos, int32_t extent)
+{
+    double v = 2.0 * pos / extent - 1.0;
+    return (int32_t)lround(MAX(-1.0, MIN(1.0, v)) * InputAbsoluteMax);
+}
+
 static os_log_t OE_CORE_LOG, OE_CORE_AUDIT_LOG;
+
+/*! OpenEmu's Arcade system responder (part of OpenEmu.app) ignores mouse events.
+ * It lives in this helper process, so add the missing overrides to forward them
+ * to the core. class_addMethod leaves alone any override the responder already has.
+ */
+static void add_arcade_mouse_forwarding(void)
+{
+    Class responder = NSClassFromString(@"OEArcadeSystemResponder");
+    if (responder == Nil)
+    {
+        return;
+    }
+
+    void (^add)(SEL, id) = ^(SEL sel, id block) {
+        Method inherited = class_getInstanceMethod(responder, sel);
+        if (inherited == NULL)
+        {
+            return;
+        }
+        IMP imp = imp_implementationWithBlock(block);
+        if (!class_addMethod(responder, sel, imp, method_getTypeEncoding(inherited)))
+        {
+            imp_removeBlock(imp);
+        }
+    };
+
+    MAMEGameCore *(^core)(id) = ^MAMEGameCore *(id r) {
+        id client = [r valueForKey:@"client"];
+        return [client isKindOfClass:[MAMEGameCore class]] ? client : nil;
+    };
+
+    add(@selector(mouseMovedAtPoint:), ^(id r, OEIntPoint p) {
+        [core(r) mouseMovedAtPoint:p];
+    });
+    add(@selector(mouseDownAtPoint:), ^(id r, OEIntPoint p) {
+        [core(r) leftMouseDownAtPoint:p];
+    });
+    add(@selector(mouseUpAtPoint), ^(id r) {
+        [core(r) leftMouseUp];
+    });
+    add(@selector(rightMouseDownAtPoint:), ^(id r, OEIntPoint p) {
+        [core(r) rightMouseDownAtPoint:p];
+    });
+    add(@selector(rightMouseUpAtPoint), ^(id r) {
+        [core(r) rightMouseUp];
+    });
+}
 
 @implementation MAMEGameCore
 
@@ -128,6 +196,13 @@ static os_log_t OE_CORE_LOG, OE_CORE_AUDIT_LOG;
     InputDevice *kb = [_osd.keyboard addDeviceNamed:@"OpenEmu Keyboard"];
     [kb addItemNamed:@"Service" id:InputItemID_F2 getter:joystick_get_state context:&_buttons[0][OEArcadeButtonService]];
     [kb addItemNamed:@"UI Configure" id:InputItemID_TAB getter:joystick_get_state context:&_buttons[0][OEArcadeUIConfigure]];
+
+    // Mouse as lightgun; the OSD enables it only for games with crosshair inputs
+    InputDevice *gun = [_osd.lightgun addDeviceNamed:@"OpenEmu Mouse"];
+    [gun addItemNamed:@"X Axis" id:InputItemID_XAXIS getter:joystick_get_state context:&_gunAxes[0]];
+    [gun addItemNamed:@"Y Axis" id:InputItemID_YAXIS getter:joystick_get_state context:&_gunAxes[1]];
+    [gun addItemNamed:@"Trigger" id:InputItemID_BUTTON1 getter:joystick_get_state context:&_gunButtons[0]];
+    [gun addItemNamed:@"Button 2" id:InputItemID_BUTTON2 getter:joystick_get_state context:&_gunButtons[1]];
 }
 
 - (void)didChangeDisplayBounds:(NSSize)bounds fps:(double)fps aspect:(NSSize)aspect
@@ -219,6 +294,8 @@ BOOL driverIsNotWorking(GameDriverOptions o)
 
 - (BOOL)loadFileAtPath:(NSString *)path error:(NSError **)error
 {
+    add_arcade_mouse_forwarding();
+
     NSString *romDir = [path stringByDeletingLastPathComponent];
     Options *opts = _osd.options;
     [opts setBasePath:self.supportDirectoryPath];
@@ -436,6 +513,46 @@ BOOL driverIsNotWorking(GameDriverOptions o)
 - (oneway void)didReleaseArcadeButton:(OEArcadeButton)button forPlayer:(NSUInteger)player
 {
     [self setState:NO ofButton:button forPlayer:player];
+}
+
+- (void)setLightgunPosition:(OEIntPoint)point
+{
+    // OpenEmu reports the point within the aspect corrected screen size
+    OEIntSize size = OECorrectScreenSizeForAspectSize(_screenRect.size, _aspectSize);
+    if (size.width <= 0 || size.height <= 0)
+    {
+        return;
+    }
+
+    _gunAxes[0] = lightgun_axis_value(point.x, size.width);
+    _gunAxes[1] = lightgun_axis_value(point.y, size.height);
+}
+
+- (oneway void)mouseMovedAtPoint:(OEIntPoint)point
+{
+    [self setLightgunPosition:point];
+}
+
+- (oneway void)leftMouseDownAtPoint:(OEIntPoint)point
+{
+    [self setLightgunPosition:point];
+    _gunButtons[0] = 1;
+}
+
+- (oneway void)leftMouseUp
+{
+    _gunButtons[0] = 0;
+}
+
+- (oneway void)rightMouseDownAtPoint:(OEIntPoint)point
+{
+    [self setLightgunPosition:point];
+    _gunButtons[1] = 1;
+}
+
+- (oneway void)rightMouseUp
+{
+    _gunButtons[1] = 0;
 }
 
 #pragma mark - Save State
