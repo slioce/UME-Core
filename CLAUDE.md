@@ -88,6 +88,6 @@ The core logs via `os_log` with subsystem `org.openemu.MAME` (category `audit` f
 
 A missing "Using GameAudio2 driver" line after "Load ROM at path …" means loading failed before emulation started. That is usually the audit rejecting the set (`AuditSummaryIncorrect` or `AuditSummaryNotFound`). Compare the zip's CRCs (`unzip -v`) with the `ROM_START( <driver> )` block in `deps/mame/src/mame/<maker>/*.cpp`. ROM sets must match MAME 0.289. Older sets often lack newly added PLD dumps.
 
-ROMs live in `~/Library/Application Support/OpenEmu/Game Library/roms/Arcade/`.
+ROMs live in `~/Library/Application Support/OpenEmu/Game Library/roms/Arcade/`. `tools/romaudit.sh [rom-dir]` audits a whole folder against the built `mamearcade_headless.dylib`. It applies the same checks as `loadFileAtPath:` (driver name, unsupported machines, ROM audit) and prints its report in Italian.
 
 If a gun game tracks the pointer (MAME's crosshair follows the mouse) but every shot lands in one corner, the game's own gun calibration is stale. It is stored in the game's NVRAM (`~/Library/Application Support/OpenEmu/MAME/nvram/<driver>/`), typically created by a core build without pointer input. Recalibrate from the game's test menu (Service button), or reset the NVRAM while no game is running. This happened with `term2`.
