@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 An OpenEmu core plugin (`MAME.oecoreplugin`) for arcade games, wrapping MAME 0.289. The repo itself only contains the thin OpenEmu glue (`MAMEGameCore.m`); almost everything else lives in the `deps/mame` submodule, a fork of MAME (`slioce/mame`, branch `mame0289-headless`) that adds a "headless" OSD layer and builds MAME as a dynamic library, `mamearcade_headless.dylib`.
 
+The Amiga system and core for the same OpenEmu install (PUAE, plus an `Amiga.oesystemplugin` copied into OpenEmu.app) live in the sibling repo `../PUAE-Core`. MAME's own Amiga drivers are all `MACHINE_NOT_WORKING` in 0.289.
+
 There are no tests or linters. To verify a change, build it, install the plugin and load ROMs in OpenEmu.
 
 ## Build
