@@ -16,12 +16,12 @@ static NSString *problemForRecord(AuditRecord *rec)
     switch (rec.substatus)
     {
         case AuditSubstatusFoundBadChecksum:
-            return [NSString stringWithFormat:@"checksum errato (atteso %@, trovato %@)", rec.expectedHashes, rec.actualHashes];
+            return [NSString stringWithFormat:@"wrong checksum (expected %@, found %@)", rec.expectedHashes, rec.actualHashes];
         case AuditSubstatusFoundWrongLength:
-            return [NSString stringWithFormat:@"dimensione errata (attesi %lu byte, trovati %lu)",
+            return [NSString stringWithFormat:@"wrong size (expected %lu bytes, found %lu)",
                     (unsigned long)rec.expectedLength, (unsigned long)rec.actualLength];
         case AuditSubstatusNotFound:
-            return [NSString stringWithFormat:@"mancante (%@)", rec.expectedHashes];
+            return [NSString stringWithFormat:@"missing (%@)", rec.expectedHashes];
         default:
             return nil; // good, nodump, optional, unverified: acceptable per MAMEGameCore
     }
@@ -67,22 +67,22 @@ int main(int argc, const char *argv[])
                 {
                     // not a game: most likely a device/BIOS set (qsound_hle, cchip, …) that games load from
                     support++;
-                    printf("--   %s (non è un gioco: file di supporto BIOS/device, va bene se usato da altri set)\n", name.UTF8String);
+                    printf("--   %s (not a game: BIOS/device support set, fine if other sets use it)\n", name.UTF8String);
                     continue;
                 }
-                [problems addObject:@"nome non riconosciuto da MAME 0.289: il file deve chiamarsi esattamente <nome-driver>.zip, senza suffissi come \" (1)\""];
+                [problems addObject:@"not a MAME driver name: the file must be called exactly <driver>.zip, without suffixes such as \" (1)\""];
             }
             else
             {
                 GameDriver *drv = osd.driver;
                 title = [NSString stringWithFormat:@"%@ — %@", name, drv.fullName];
                 if (drv.parent.length && ![drv.parent isEqualToString:@"0"])
-                    title = [title stringByAppendingFormat:@" [clone di %@]", drv.parent];
+                    title = [title stringByAppendingFormat:@" [clone of %@]", drv.parent];
 
                 if (drv.flags & (GameDriverMachineRequiresArtwork | GameDriverMachineMechanical))
-                    [problems addObject:@"macchina meccanica o che richiede artwork: non supportata dal core"];
+                    [problems addObject:@"mechanical machine, or one that needs artwork: not supported by the core"];
                 else if (driverIsNotWorking(drv.flags))
-                    [problems addObject:@"driver marcato \"non funzionante\" in MAME: il core lo rifiuta"];
+                    [problems addObject:@"driver marked \"not working\" in MAME: the core refuses it"];
 
                 if (ar.summary == AuditSummaryIncorrect || ar.summary == AuditSummaryNotFound)
                 {
@@ -92,12 +92,12 @@ int main(int argc, const char *argv[])
                         if (!p)
                             continue;
                         NSString *where = rec.sharedDevice
-                            ? [NSString stringWithFormat:@" → va in %@.zip (%@)", rec.sharedDevice.shortName, rec.sharedDevice.name]
+                            ? [NSString stringWithFormat:@" → belongs in %@.zip (%@)", rec.sharedDevice.shortName, rec.sharedDevice.name]
                             : @"";
                         [problems addObject:[NSString stringWithFormat:@"%@: %@%@", rec.name, p, where]];
                     }
                     if (problems.count == 0)
-                        [problems addObject:@"audit fallito (set non trovato)"];
+                        [problems addObject:@"audit failed (set not found)"];
                 }
             }
 
@@ -115,7 +115,7 @@ int main(int argc, const char *argv[])
             }
         }
 
-        printf("\n%lu set OK, %lu con problemi, %lu file di supporto\n", (unsigned long)ok, (unsigned long)bad, (unsigned long)support);
+        printf("\n%lu sets OK, %lu with problems, %lu support sets\n", (unsigned long)ok, (unsigned long)bad, (unsigned long)support);
         return bad ? 1 : 0;
     }
 }

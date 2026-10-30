@@ -16,6 +16,8 @@
 	<string>${PRODUCT_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -41,7 +43,7 @@
 	<key>OEGameCorePlayerCount</key>
 	<string>8</string>
 	<key>OEProjectURL</key>
-	<string>http://mamedev.org</string>
+	<string>https://github.com/slioce/UME-Core</string>
 	<key>OESystemIdentifiers</key>
 	<array>
 		<string>openemu.system.arcade</string>
@@ -49,6 +51,6 @@
 	<key>SUEnableAutomaticChecks</key>
 	<string>1</string>
 	<key>SUFeedURL</key>
-	<string>https://raw.github.com/OpenEmu/OpenEmu-Update/master/mame_appcast.xml</string>
+	<string>https://raw.githubusercontent.com/slioce/UME-Core/master/appcast.xml</string>
 </dict>
 </plist>

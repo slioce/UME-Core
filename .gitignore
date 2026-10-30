@@ -1,21 +1,24 @@
-# Xcode
-build
-*/Build/*
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-profile
-*.moved-aside
+# Build output
+build/
 DerivedData/
-.idea/
-*.hmap
-
-# MAME
-*.a
 *.o
+*.a
+
+# Xcode user state
+xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.moved-aside
+*.hmap
+.idea/
+
+# Per-developer settings (OpenEmu checkout location, signing team)
+Config/Local.xcconfig
+Config/Local.mk
+
+# Personal notes
+/docs/giochi-consigliati.md
+
+.DS_Store

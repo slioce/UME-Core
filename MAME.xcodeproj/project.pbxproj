@@ -70,11 +70,12 @@
 		D00A069F17637AB600C99008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		D00A06A417637E9100C99008 /* MAMEGameCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MAMEGameCore.h; sourceTree = "<group>"; };
 		D00A06A517637E9100C99008 /* MAMEGameCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MAMEGameCore.m; sourceTree = "<group>"; };
-		D00A06A717637EB500C99008 /* OEArcadeSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OEArcadeSystemResponderClient.h; path = ../OpenEmu/SystemPlugins/Arcade/OEArcadeSystemResponderClient.h; sourceTree = "<group>"; };
+		D00A06A717637EB500C99008 /* OEArcadeSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OEArcadeSystemResponderClient.h; path = ../OpenEmu/OpenEmu/SystemPlugins/Arcade/OEArcadeSystemResponderClient.h; sourceTree = "<group>"; };
 		D0AADE2F176381FB00759E26 /* MAME_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MAME_Prefix.pch; sourceTree = "<group>"; };
 		D0AADE30176382F900759E26 /* OpenEmuBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OpenEmuBase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0AADE331763838A00759E26 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		D0AADE341763838A00759E26 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		D0C0F1600000000000000001 /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Shared.xcconfig; path = Config/Shared.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +97,7 @@
 			children = (
 				D00A06A317637BDD00C99008 /* Classes */,
 				D0AADE2E176381E900759E26 /* Other Sources */,
+				D0C0F1600000000000000002 /* Config */,
 				D00A06931763763000C99008 /* Resources */,
 				D00A068C1763763000C99008 /* Frameworks */,
 				D00A068B1763763000C99008 /* Products */,
@@ -182,6 +184,14 @@
 			name = osd;
 			sourceTree = "<group>";
 		};
+		D0C0F1600000000000000002 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				D0C0F1600000000000000001 /* Shared.xcconfig */,
+			);
+			name = Config;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -259,7 +269,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "install_name_tool -change mamearcade_headless.dylib @rpath/mamearcade_headless.dylib ${TARGET_BUILD_DIR}/${EXECUTABLE_PATH}\n";
+			shellScript = "# The dylib's install name is a bare filename; point the loader at the embedded copy.\ninstall_name_tool -change mamearcade_headless.dylib @rpath/mamearcade_headless.dylib \"${TARGET_BUILD_DIR}/${EXECUTABLE_PATH}\"\n# The plugin embeds MAME (GPL-2.0-or-later): ship the license texts with it.\nLEGAL=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/legal\"\nmkdir -p \"$LEGAL\"\ncp \"${SRCROOT}/LICENSE\" \"$LEGAL/LICENSE-UME-Core.txt\"\ncp \"${SRCROOT}/deps/mame/COPYING\" \"$LEGAL/COPYING-MAME.txt\"\ncp \"${SRCROOT}/deps/mame/docs/legal/GPL-2.0\" \"${SRCROOT}/deps/mame/docs/legal/BSD-3-Clause\" \"$LEGAL/\"\n";
 		};
 		D0AADE2D1763815000759E26 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -348,7 +358,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				ONLY_ACTIVE_ARCH = YES;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				SDKROOT = macosx;
@@ -403,7 +413,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				SDKROOT = macosx;
 			};
@@ -411,55 +421,15 @@
 		};
 		D00A069D1763763000C99008 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D0C0F1600000000000000001 /* Shared.xcconfig */;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0.289.0.1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../OpenEmu/Arcade\"",
-					"$(SRCROOT)/deps/mame/src/osd/headless/public",
-				);
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "\"$(USER_LIBRARY_DIR)/Application Support/OpenEmu/Cores\"";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/deps/mame",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.openemu.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				WRAPPER_EXTENSION = oecoreplugin;
 			};
 			name = Debug;
 		};
 		D00A069E1763763000C99008 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D0C0F1600000000000000001 /* Shared.xcconfig */;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0.289.0.1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../OpenEmu/Arcade\"",
-					"$(SRCROOT)/deps/mame/src/osd/headless/public",
-				);
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "\"$(USER_LIBRARY_DIR)/Application Support/OpenEmu/Cores\"";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/deps/mame",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.openemu.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				WRAPPER_EXTENSION = oecoreplugin;
 			};
 			name = Release;
 		};

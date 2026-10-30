@@ -1,0 +1,38 @@
+// Build settings for the MAME core target.
+// Per-developer values (where your OpenEmu checkout lives, a signing team) go in Local.xcconfig,
+// which is not committed; see README.
+
+// Version of the plugin. CFBundleVersion (CURRENT_PROJECT_VERSION) is what OpenEmu compares with the
+// appcast, so bump it for every release: <MAME version>.0.<plugin revision>.
+MARKETING_VERSION = 0.289
+CURRENT_PROJECT_VERSION = 0.289.0.2
+
+// OpenEmu sources, for OEArcadeSystemResponderClient.h. A sibling checkout by default.
+OPENEMU_DIR = $(SRCROOT)/../OpenEmu
+
+// OpenEmu.app is x86_64-only, so the core and the MAME dylib are too. Apple Silicon runs it under Rosetta.
+ARCHS = x86_64
+ONLY_ACTIVE_ARCH = NO
+SDKROOT = macosx
+MACOSX_DEPLOYMENT_TARGET = 12.4
+
+PRODUCT_NAME = $(TARGET_NAME)
+PRODUCT_BUNDLE_IDENTIFIER = org.openemu.MAME
+WRAPPER_EXTENSION = oecoreplugin
+INFOPLIST_FILE = Info.plist
+COMBINE_HIDPI_IMAGES = YES
+SKIP_INSTALL = YES
+INSTALL_PATH = "$(USER_LIBRARY_DIR)/Application Support/OpenEmu/Cores"
+LD_RUNPATH_SEARCH_PATHS = @loader_path/../Frameworks
+GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp
+GCC_PRECOMPILE_PREFIX_HEADER = NO
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+HEADER_SEARCH_PATHS = $(inherited) "$(OPENEMU_DIR)/OpenEmu/SystemPlugins/Arcade" $(SRCROOT)/deps/mame/src/osd/headless/public
+LIBRARY_SEARCH_PATHS = $(inherited) $(PROJECT_DIR)/deps/mame
+
+// Signed to run locally; OpenEmu removes the quarantine flag when it imports the plugin. No developer
+// account is needed. Local.xcconfig may set DEVELOPMENT_TEAM and CODE_SIGN_IDENTITY instead.
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+
+#include? "Local.xcconfig"
