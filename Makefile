@@ -86,6 +86,7 @@ appcast: $(ZIP)
 
 # Publish: push the current commit, create the GitHub Release v<VERSION> with the zip attached, then
 # commit and push the appcast so that OpenEmu only sees the new version once the download exists.
+# The appcast is written from the zip that was uploaded, not from a rebuilt one, so its length matches.
 release: $(ZIP)
 	@git diff --quiet && git diff --cached --quiet || { echo "Commit your changes before releasing."; exit 1; }
 	@git -C $(MAME) fetch -q origin && git -C $(MAME) merge-base --is-ancestor HEAD origin/mame0289-headless \
@@ -99,7 +100,7 @@ release: $(ZIP)
 	  "The plugin embeds MAME, licensed under the GPL-2.0-or-later. Corresponding source: https://github.com/slioce/mame/tree/$$(git -C $(MAME) rev-parse HEAD)" \
 	  > $(BUILD)/notes.md
 	gh release create v$(VERSION) -R $(REPO) --title "MAME $(VERSION)" --notes-file $(BUILD)/notes.md $(ZIP)
-	$(MAKE) appcast
+	sh tools/make-appcast.sh "$(VERSION)" "$(REPO)" "$(ZIP)" "$(MINOS)" > appcast.xml
 	git add appcast.xml
 	git commit -m "Update appcast for $(VERSION)"
 	git push origin HEAD
