@@ -27,12 +27,3 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------------
-
-This license covers the source code in this repository: the OpenEmu glue
-(MAMEGameCore and the tools). The binary releases (MAME.oecoreplugin) also
-embed a build of MAME, which is licensed under the GNU General Public License
-version 2 or later. See the files in Contents/Resources/legal/ inside the
-plugin, and https://github.com/slioce/mame (branch mame0289-headless) for the
-corresponding source.
