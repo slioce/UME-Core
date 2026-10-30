@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>MAME</title>
+    <link>https://raw.githubusercontent.com/slioce/UME-Core/master/appcast.xml</link>
+    <description>MAME core for OpenEmu: most recent version.</description>
+    <language>en</language>
+    <item>
+      <title>MAME Version 0.289.0.2</title>
+      <sparkle:releaseNotesLink>https://github.com/slioce/UME-Core/releases/tag/v0.289.0.2</sparkle:releaseNotesLink>
+      <pubDate>Fri, 30 Oct 2026 22:57:26 +0100</pubDate>
+      <enclosure url="https://github.com/slioce/UME-Core/releases/download/v0.289.0.2/MAME_0.289.0.2.zip" sparkle:version="0.289.0.2" type="application/octet-stream" length="53946605"/>
+      <sparkle:minimumSystemVersion>12.4</sparkle:minimumSystemVersion>
+    </item>
+  </channel>
+</rss>
